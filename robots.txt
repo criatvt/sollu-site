@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sollu.io/sitemap.xml

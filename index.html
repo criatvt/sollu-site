@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>sollu — write at the speed of thought, privately</title>
+<meta name="description" content="A voice-to-text tool for macOS that runs entirely on your Mac and never leaves it. Private beta open — 50 spots." />
+<link rel="icon" type="image/svg+xml" href="assets/sollu-favicon.svg" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --bg:#FAF9F6;
+    --ink:#1a1a1a;
+    --body:#333;
+    --muted:#6b6b68;
+    --rule:#e5e3dc;
+    --rule-soft:#eeece4;
+    --prussian:#003153;
+    --prussian-soft:#0d3b60;
+    --accent:#b63d2f;
+    --serif:'Fraunces', Georgia, serif;
+    --sans:'Inter', -apple-system, 'Segoe UI', sans-serif;
+    --max:1040px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; overflow-x:clip}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:var(--bg);
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    z-index:0; pointer-events:none;
+    background-image: radial-gradient(circle, rgba(0,49,83,0.13) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 45%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 45%, transparent 85%);
+    animation: drift 60s linear infinite;
+  }
+  @keyframes drift { to { background-position: 22px 22px; } }
+  @media (prefers-reduced-motion: reduce){ body::before{animation:none} }
+  body > *{ position:relative; z-index:1 }
+
+  ::selection{ background:var(--prussian); color:var(--bg) }
+  a{ color:inherit }
+
+  /* ============ NAV ============ */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    padding:1.1rem 1.5rem;
+    background:rgba(250,249,246,0.82);
+    backdrop-filter:saturate(160%) blur(12px);
+    -webkit-backdrop-filter:saturate(160%) blur(12px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s ease;
+  }
+  .nav.scrolled{ border-bottom-color:var(--rule) }
+  .nav-inner{
+    max-width:var(--max); margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:1rem;
+  }
+  .brand{
+    display:flex; align-items:center; gap:.55rem;
+    text-decoration:none; color:inherit;
+  }
+  .brand svg{ width:22px; height:22px }
+  .brand-word{
+    font-family:var(--serif); font-size:1.2rem; letter-spacing:-.01em;
+    font-weight:400;
+  }
+  .nav-cta{
+    text-decoration:none;
+    font-size:.85rem; font-weight:500;
+    padding:.55rem 1rem;
+    background:var(--prussian);
+    color:#fff;
+    border-radius:999px;
+    transition:transform .15s ease, background .2s ease;
+  }
+  .nav-cta:hover{ background:var(--prussian-soft); transform:translateY(-1px) }
+
+  /* ============ SHARED ============ */
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 1.5rem }
+  .eyebrow{
+    font-family:var(--sans);
+    font-size:.72rem; letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 1rem;
+    font-weight:500;
+  }
+  .h2{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:clamp(1.75rem, 3.8vw, 2.5rem);
+    line-height:1.15;
+    letter-spacing:-.015em;
+    margin:0 0 1.25rem;
+    color:var(--ink);
+    text-wrap:balance;
+  }
+  .h2 em{ font-style:italic; color:var(--prussian) }
+  .lede{
+    font-size:1.05rem;
+    color:var(--body);
+    max-width:55ch;
+    margin:0 0 1.25rem;
+    line-height:1.65;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:.55rem;
+    padding:.95rem 1.6rem;
+    background:var(--prussian);
+    color:#fff;
+    text-decoration:none;
+    border-radius:999px;
+    font-weight:500;
+    font-size:1rem;
+    transition:transform .15s ease, background .2s ease, box-shadow .2s ease;
+    box-shadow:0 1px 0 rgba(0,0,0,.04);
+  }
+  .btn:hover{ background:var(--prussian-soft); transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,49,83,.18) }
+  .btn .arrow{
+    transition:transform .2s ease;
+  }
+  .btn:hover .arrow{ transform:translateX(3px) }
+  .arrow-out{
+    vertical-align:-1px;
+    margin-left:.15rem;
+  }
+  .btn:hover .arrow-out{ transform:translate(2px, -2px) }
+  .nav-cta .arrow-out{ opacity:.85; margin-left:.2rem }
+  .nav-cta:hover .arrow-out{ transform:translate(1.5px, -1.5px); opacity:1 }
+  footer a .arrow-out{ opacity:.7 }
+  footer a:hover .arrow-out{ transform:translate(1.5px, -1.5px); opacity:1 }
+  .btn-ghost{
+    background:transparent; color:var(--prussian);
+    border:1px solid var(--rule);
+    box-shadow:none;
+  }
+  .btn-ghost:hover{ background:transparent; color:var(--prussian-soft); border-color:var(--prussian) }
+
+  /* ============ HERO ============ */
+  .hero{
+    padding:3.5rem 1.5rem 3rem;
+    text-align:center;
+  }
+  .hero-inner{ max-width:780px; margin:0 auto }
+  .ink{
+    width:0; height:0;
+    border-radius:50%;
+    background:var(--prussian);
+    opacity:0;
+    margin:.25rem auto 2rem;
+    animation:
+      inkIn 800ms cubic-bezier(0.34,1.56,0.64,1) forwards 150ms,
+      inkBreath 4s ease-in-out infinite 1s;
+  }
+  @keyframes inkIn{
+    0%{ width:0; height:0; opacity:0 }
+    100%{ width:14px; height:14px; opacity:1 }
+  }
+  @keyframes inkBreath{
+    0%,100%{ width:14px; height:14px; opacity:.85 }
+    50%    { width:36px; height:36px; opacity:1 }
+  }
+  .hero h1{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:clamp(2.4rem, 6vw, 4rem);
+    line-height:1.03;
+    letter-spacing:-.02em;
+    margin:0 0 1.25rem;
+    text-wrap:balance;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--prussian);
+  }
+  .hero-sub{
+    font-size:1.15rem;
+    color:var(--body);
+    max-width:560px;
+    margin:0 auto 2rem;
+    line-height:1.55;
+    text-wrap:balance;
+  }
+  .hero-ctas{
+    display:flex; gap:.75rem;
+    justify-content:center; align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:1rem;
+  }
+  .hero-meta{
+    font-size:.82rem;
+    color:var(--muted);
+    letter-spacing:.04em;
+    margin:0;
+  }
+  .hero-meta .sep{ opacity:.4; margin:0 .5rem }
+
+  /* ============ DEMO MOCK ============ */
+  .demo{
+    max-width:720px;
+    margin:3rem auto 0;
+    padding:0 1.5rem;
+  }
+  .demo-window{
+    background:#fff;
+    border:1px solid var(--rule);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -30px rgba(0,49,83,.18), 0 1px 0 rgba(0,0,0,.02);
+  }
+  .demo-bar{
+    padding:.6rem .9rem;
+    border-bottom:1px solid var(--rule-soft);
+    display:flex; align-items:center; gap:.5rem;
+    background:#fafaf7;
+  }
+  .demo-bar .dot{
+    width:11px; height:11px; border-radius:50%;
+    background:#e0ddd4;
+  }
+  .demo-bar .dot:nth-child(1){ background:#ff6159 }
+  .demo-bar .dot:nth-child(2){ background:#ffbd2e }
+  .demo-bar .dot:nth-child(3){ background:#28c93f }
+  .demo-bar-title{
+    flex:1; text-align:center;
+    font-size:.72rem; color:var(--muted);
+    letter-spacing:.06em;
+    font-family:var(--serif);
+    font-style:italic;
+  }
+  .demo-body{
+    padding:1.75rem 1.5rem 1.5rem;
+    font-family:var(--serif);
+    font-size:1.15rem;
+    line-height:1.6;
+    color:var(--ink);
+    min-height:130px;
+  }
+  .demo-body .typed{ color:var(--ink) }
+  .demo-caret{
+    display:inline-block;
+    width:2px; height:1.1em;
+    background:var(--prussian);
+    vertical-align:-2px;
+    margin-left:1px;
+    animation:caret 1s steps(2) infinite;
+  }
+  @keyframes caret { 50% { opacity:0 } }
+  .demo-foot{
+    padding:.7rem 1.2rem;
+    border-top:1px solid var(--rule-soft);
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:.78rem;
+    color:var(--muted);
+    font-family:var(--sans);
+    background:#fafaf7;
+  }
+  .demo-foot .live{
+    display:inline-flex; align-items:center; gap:.45rem;
+    color:var(--prussian);
+  }
+  .demo-foot .pulse{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--prussian);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:.35; transform:scale(.8)}
+    50%{opacity:1; transform:scale(1.15)}
+  }
+
+  /* ============ SECTION SHELL ============ */
+  section{ padding:4.5rem 0 }
+  .divider{
+    max-width:var(--max); margin:0 auto;
+    padding:0 1.5rem;
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:.7rem; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--muted);
+    font-family:var(--sans); font-weight:500;
+  }
+  .divider::before,
+  .divider::after{
+    content:""; flex:1; height:1px; background:var(--rule);
+    margin:0 1rem;
+  }
+  .divider span:last-child{ font-family:var(--serif); font-style:italic; text-transform:none; letter-spacing:0 }
+
+  /* ============ WHAT IT IS — cards ============ */
+  .what{ padding-top:3.5rem }
+  .what-head{ text-align:center; max-width:640px; margin:0 auto 2.75rem }
+  .what-head .lede{ margin-left:auto; margin-right:auto }
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1rem;
+  }
+  @media (max-width:820px){
+    .card-grid{ grid-template-columns:1fr; gap:.9rem }
+  }
+  .card{
+    background:#fff;
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:1.75rem 1.5rem 1.6rem;
+    display:flex; flex-direction:column; gap:.65rem;
+    transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .card:hover{ transform:translateY(-2px); border-color:rgba(0,49,83,.25); box-shadow:0 14px 28px -18px rgba(0,49,83,.2) }
+  .card-num{
+    font-family:var(--serif); font-style:italic;
+    font-size:.95rem; color:var(--prussian);
+  }
+  .card h3{
+    font-family:var(--serif); font-weight:400;
+    font-size:1.25rem; margin:0;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  .card p{
+    margin:0; font-size:.95rem; color:var(--body);
+    line-height:1.55;
+  }
+
+  /* ============ WHO IT'S FOR ============ */
+  .who{ padding:4.5rem 0 1rem; }
+  .who-grid{
+    list-style:none; padding:0; margin:3rem auto 0;
+    max-width:820px;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:.9rem 2rem;
+  }
+  @media (max-width:640px){ .who-grid{ grid-template-columns:1fr } }
+  .who-grid li{
+    font-size:1rem;
+    color:var(--body);
+    line-height:1.5;
+    padding:.6rem 0;
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .who-tag{
+    font-family:var(--serif);
+    font-style:italic;
+    color:var(--prussian);
+    margin-right:.5rem;
+    font-size:1.06rem;
+  }
+
+  /* ============ WHY — combined manifesto + maker ============ */
+  .why{
+    background:#fff;
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+    padding:5rem 0;
+  }
+  .why-inner{
+    max-width:680px; margin:0 auto; padding:0 1.5rem;
+  }
+  .why-quote{
+    font-family:var(--serif); font-style:italic;
+    font-size:clamp(1.4rem, 3.4vw, 1.95rem);
+    line-height:1.3;
+    color:var(--prussian);
+    margin:0 0 2rem;
+    text-wrap:balance;
+    letter-spacing:-.01em;
+  }
+  .why-quote em{ font-style:normal; color:var(--ink); font-weight:500 }
+  .why-body p{
+    font-size:1.04rem;
+    color:var(--body);
+    line-height:1.75;
+    margin:0 0 1.15rem;
+  }
+  .why-body p em{ font-style:italic; color:var(--prussian) }
+  .why-sig{
+    margin-top:1.75rem;
+    display:flex; align-items:center; gap:1rem;
+    font-size:.88rem; color:var(--muted);
+  }
+  .why-sig-line{ flex:0 0 40px; height:1px; background:var(--rule) }
+  .why-sig a{
+    color:var(--ink); text-decoration:underline;
+    text-decoration-color:var(--rule);
+    text-underline-offset:4px;
+    font-family:var(--serif); font-style:italic;
+  }
+  .why-cta{
+    margin-top:2.5rem;
+    padding-top:2rem;
+    border-top:1px solid var(--rule);
+  }
+
+  /* ============ HOW — 4 steps ============ */
+  .how-head{ text-align:center; max-width:620px; margin:0 auto 2.75rem }
+  .how-head .lede{ margin-left:auto; margin-right:auto }
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:.75rem;
+    position:relative;
+  }
+  @media (max-width:900px){
+    .steps{ grid-template-columns:repeat(2, 1fr) }
+  }
+  @media (max-width:480px){
+    .steps{ grid-template-columns:1fr }
+  }
+  .step{
+    background:#fff;
+    border:1px solid var(--rule);
+    border-radius:12px;
+    padding:1.5rem 1.25rem;
+    display:flex; flex-direction:column; gap:.5rem;
+    position:relative;
+  }
+  .step-n{
+    font-family:var(--serif); font-style:italic;
+    font-size:.82rem; color:var(--prussian);
+    letter-spacing:.02em;
+  }
+  .step h4{
+    font-family:var(--serif); font-weight:400;
+    font-size:1.15rem; margin:0;
+    color:var(--ink);
+    letter-spacing:-.005em;
+  }
+  .step p{
+    margin:0; font-size:.88rem; color:var(--body);
+    line-height:1.5;
+  }
+
+  /* ============ BETA — what you get ============ */
+  .beta{
+    padding:5rem 1.5rem 4rem;
+  }
+  .beta-inner{
+    max-width:820px; margin:0 auto;
+    background:var(--prussian);
+    color:#fff;
+    border-radius:20px;
+    padding:3.5rem 2.25rem;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .beta-inner::before{
+    content:""; position:absolute; inset:0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1.2px);
+    background-size: 18px 18px;
+    mask-image: radial-gradient(ellipse 80% 90% at 50% 0%, #000 0%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 90% at 50% 0%, #000 0%, transparent 80%);
+    pointer-events:none;
+  }
+  .beta-inner > *{ position:relative }
+  .beta-eyebrow{
+    font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
+    color:rgba(255,255,255,.65);
+    font-weight:500;
+    margin:0 0 1.25rem;
+  }
+  .beta-inner h2{
+    font-family:var(--serif); font-weight:400;
+    font-size:clamp(1.8rem, 4vw, 2.6rem);
+    line-height:1.15;
+    margin:0 0 1.5rem;
+    color:#fff;
+    text-wrap:balance;
+    letter-spacing:-.015em;
+  }
+  .beta-inner h2 em{ font-style:italic; color:#f4d58d }
+  .beta-sub{
+    font-size:1.05rem;
+    color:rgba(255,255,255,.8);
+    max-width:560px; margin:0 auto 2.25rem;
+    line-height:1.6;
+  }
+  .perks{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:.9rem;
+    text-align:left;
+    max-width:640px;
+    margin:0 auto 2.5rem;
+  }
+  @media (max-width:620px){
+    .perks{ grid-template-columns:1fr }
+  }
+  .perk{
+    padding:1.1rem 1.2rem;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    display:flex; align-items:flex-start; gap:.75rem;
+  }
+  .perk-ico{
+    flex-shrink:0;
+    width:22px; height:22px;
+    display:grid; place-items:center;
+    color:#f4d58d;
+    margin-top:1px;
+  }
+  .perk-text{
+    font-size:.92rem;
+    line-height:1.5;
+    color:rgba(255,255,255,.9);
+  }
+  .perk-text strong{
+    display:block;
+    font-family:var(--serif); font-style:italic;
+    font-weight:400;
+    font-size:1rem;
+    color:#fff;
+    margin-bottom:.15rem;
+  }
+  .beta-inner .btn{
+    background:#f4d58d; color:#1a1a1a;
+    box-shadow:0 6px 20px rgba(0,0,0,.2);
+  }
+  .beta-inner .btn:hover{
+    background:#fbe5a7; color:#1a1a1a;
+    box-shadow:0 10px 30px rgba(0,0,0,.28);
+  }
+  .beta-fine{
+    margin:1.25rem 0 0;
+    font-size:.8rem;
+    color:rgba(255,255,255,.5);
+    letter-spacing:.02em;
+  }
+
+  /* ============ TIMELINE + COUNTDOWN ============ */
+  .timeline{
+    display:flex; align-items:flex-start; justify-content:center;
+    gap:.5rem;
+    max-width:640px; margin:2.5rem auto 2rem;
+    flex-wrap:wrap;
+  }
+  .timeline-item{
+    display:flex; flex-direction:column; align-items:center;
+    min-width:110px;
+    gap:.35rem;
+  }
+  .timeline-dot{
+    width:10px; height:10px; border-radius:50%;
+    background:rgba(255,255,255,.35);
+    border:1px solid rgba(255,255,255,.5);
+  }
+  .timeline-dot-final{
+    background:#fff; border-color:#fff;
+    box-shadow:0 0 0 4px rgba(255,255,255,.12);
+  }
+  .timeline-label{
+    font-family:var(--serif); font-style:italic;
+    font-size:.95rem; color:rgba(255,255,255,.85);
+  }
+  .timeline-date{
+    font-size:.78rem; letter-spacing:.06em;
+    text-transform:uppercase; color:rgba(255,255,255,.5);
+  }
+  .timeline-line{
+    flex:1; height:1px; max-width:80px;
+    background:linear-gradient(90deg, rgba(255,255,255,.4), rgba(255,255,255,.1));
+    margin-top:5px;
+  }
+  @media (max-width:640px){
+    .timeline{ flex-direction:column; align-items:center; gap:1rem }
+    .timeline-line{ width:1px; height:20px; max-width:none; background:linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,.1)) }
+  }
+  .countdown{
+    margin:1.5rem auto 0; max-width:560px;
+    text-align:center;
+  }
+  .countdown-label{
+    display:block;
+    font-family:var(--serif); font-style:italic;
+    font-size:.95rem; color:rgba(255,255,255,.7);
+    margin-bottom:.9rem;
+  }
+  .countdown-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr);
+    gap:.75rem;
+    max-width:480px; margin:0 auto;
+  }
+  .countdown-grid > div{
+    padding:.9rem .5rem;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    background:rgba(255,255,255,.04);
+    display:flex; flex-direction:column; gap:.2rem;
+  }
+  .cd-num{
+    font-family:var(--serif);
+    font-size:1.75rem; font-weight:400;
+    color:#fff;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.01em;
+  }
+  .cd-unit{
+    font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.5);
+  }
+
+  /* ============ FOOTER ============ */
+  footer{
+    padding:2.5rem 1.5rem 3rem;
+    text-align:center;
+    color:var(--muted);
+    font-size:.82rem;
+    border-top:1px solid var(--rule);
+  }
+  footer .foot-brand{
+    display:inline-flex; align-items:center; gap:.5rem;
+    margin-bottom:.65rem;
+    font-family:var(--serif); font-size:1rem; color:var(--ink);
+  }
+  footer .foot-brand svg{ width:18px; height:18px }
+  footer a{
+    color:var(--muted);
+    text-decoration:underline;
+    text-decoration-color:var(--rule);
+    text-underline-offset:3px;
+  }
+  footer a:hover{ color:var(--prussian) }
+
+  /* ============ REVEAL ============ */
+  .reveal{ opacity:0; transform:translateY(12px); transition:opacity .7s ease, transform .7s ease }
+  .reveal.in{ opacity:1; transform:none }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1; transform:none; transition:none }
+  }
+
+  /* ============ MOBILE TIGHTEN ============ */
+  @media (max-width:560px){
+    body{ font-size:16px }
+    .hero{ padding:2.5rem 1.25rem 2rem }
+    section{ padding:3.25rem 0 }
+    .why{ padding:3.75rem 0 }
+    .beta{ padding:3.5rem 1rem 3rem }
+    .beta-inner{ padding:2.5rem 1.25rem }
+    .divider{ padding:0 1.25rem; font-size:.65rem }
+    .divider::before, .divider::after{ margin:0 .75rem }
+    .demo-body{ font-size:1rem; padding:1.35rem 1.2rem 1.15rem }
+    .hero-sub{ font-size:1.02rem }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="brand" aria-label="sollu">
+      <svg viewBox="0 0 512 512" aria-hidden="true">
+        <circle cx="256" cy="256" r="230" fill="#003153" opacity="0.08"/>
+        <circle cx="256" cy="256" r="160" fill="#003153" opacity="0.35"/>
+        <circle cx="256" cy="256" r="105" fill="#003153" opacity="1"/>
+      </svg>
+      <span class="brand-word">sollu</span>
+    </a>
+    <a href="https://forms.gle/Gb5ygpXr7MjD7NTUA" class="nav-cta" target="_blank" rel="noopener">Join the beta <svg class="arrow arrow-out" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="ink" aria-hidden="true"></div>
+    <h1>Write at the speed <br/>of thought, <em>privately.</em></h1>
+    <p class="hero-sub">Local-first voice-to-text for macOS.</p>
+    <div class="hero-ctas">
+      <a href="https://forms.gle/Gb5ygpXr7MjD7NTUA" class="btn" target="_blank" rel="noopener">
+        Join the beta
+        <svg class="arrow arrow-out" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      </a>
+      <a href="#why" class="btn btn-ghost">Why it exists</a>
+    </div>
+    <p class="hero-meta">50 spots <span class="sep">·</span> macOS · Apple Silicon <span class="sep">·</span> free throughout beta</p>
+  </div>
+</header>
+
+<!-- ============ DEMO MOCK ============ -->
+<div class="demo">
+  <div class="demo-window reveal">
+    <div class="demo-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="demo-bar-title">dictation — sollu</span>
+    </div>
+    <div class="demo-body" id="demoBody"><span class="typed" id="typed"></span><span class="demo-caret"></span></div>
+    <div class="demo-foot">
+      <span class="live"><span class="pulse"></span> listening · local only</span>
+      <span>Fn + Space</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ WHAT IT IS ============ -->
+<div class="divider"><span>01 · what it is</span><span>the shape of it</span></div>
+<section class="what">
+  <div class="wrap">
+    <div class="what-head reveal">
+      <p class="eyebrow">What it is</p>
+      <h2 class="h2">Local-first. <em>Private by architecture.</em></h2>
+      <p class="lede">Hold Fn, speak, let go. Text appears where your cursor is.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card reveal">
+        <span class="card-num">i.</span>
+        <h3>Runs on your Mac</h3>
+        <p>Everything happens on-device. Your audio lives in memory only while you hold the key — the moment it's transcribed, it's gone.</p>
+      </div>
+      <div class="card reveal">
+        <span class="card-num">ii.</span>
+        <h3>Works in any app</h3>
+        <p>Text lands at your cursor — in Notion, Slack, VS Code, Mail, anywhere.</p>
+      </div>
+      <div class="card reveal">
+        <span class="card-num">iii.</span>
+        <h3>Tanglish &amp; Hinglish</h3>
+        <p>Switch between English, Tamil, Hindi mid-sentence. It keeps up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHO IT'S FOR ============ -->
+<div class="divider"><span>02 · who it's for</span><span>you, probably</span></div>
+<section class="who">
+  <div class="wrap">
+    <div class="what-head reveal">
+      <p class="eyebrow">Who it's for</p>
+      <h2 class="h2">Built for people who <em>think in sentences.</em></h2>
+      <p class="lede">If your first drafts are messy, personal, or just too much to type — sollu is for you.</p>
+    </div>
+    <ul class="who-grid reveal">
+      <li><span class="who-tag">Writers</span> drafting essays, newsletters, books.</li>
+      <li><span class="who-tag">Journalists</span> capturing interviews and field notes.</li>
+      <li><span class="who-tag">Vibe coders</span> talking through prompts with Claude or Cursor.</li>
+      <li><span class="who-tag">Founders</span> dumping thoughts between meetings.</li>
+      <li><span class="who-tag">Therapists &amp; doctors</span> who cannot send notes to the cloud.</li>
+      <li><span class="who-tag">Anyone</span> who values privacy over polish.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ WHY IT EXISTS ============ -->
+<div class="divider"><span>03 · why it exists</span><span>a note from the maker</span></div>
+<section class="why" id="why">
+  <div class="why-inner">
+    <p class="why-quote reveal">A pen's job is to write. <em>Not to remember. Not to transmit.</em></p>
+
+    <div class="why-body reveal">
+      <p>A voice-to-text app, in the digital era, should act like a pen. It should hear you and write it down — nothing more. There are already plenty of notepads, audio archives, and second brains. Those are different products, for different jobs.</p>
+
+      <p>I kept looking for that pen, and couldn't find one. I'm a writer who's lazy to type — and I don't want an LLM generating my first draft. Every voice-to-text app I tried had a trade-off I couldn't live with: the transcription wasn't good enough, the privacy was someone else's policy document, or my words were quietly being used to train a model I'd never see.</p>
+
+      <p>So I built sollu for myself. Since then I've been publishing <em>at least one essay a week</em>, brainstorming with Claude out loud instead of typing, and dumping thoughts as fast as they form. Friction, gone.</p>
+
+      <p>If that sounds useful to you too — I'd love to have you in the beta.</p>
+    </div>
+
+    <div class="why-sig reveal">
+      <span class="why-sig-line"></span>
+      <a href="https://linkedin.com/in/aasifiqbalj" target="_blank" rel="noopener">Aasif Iqbal J.</a>
+      <span style="color:var(--muted)">· maker of sollu</span>
+    </div>
+
+    <div class="why-cta reveal">
+      <a href="#join" class="btn">Join the beta
+        <svg class="arrow arrow-out" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<div class="divider"><span>04 · how it works</span><span>four steps, all local</span></div>
+<section>
+  <div class="wrap">
+    <div class="how-head reveal">
+      <p class="eyebrow">How it works</p>
+      <h2 class="h2">Four steps. <em>Nothing leaves your Mac.</em></h2>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal">
+        <span class="step-n">i.</span>
+        <h4>Listen</h4>
+        <p>Hold Fn. Sollu captures audio into memory — not to disk.</p>
+      </div>
+      <div class="step reveal">
+        <span class="step-n">ii.</span>
+        <h4>Transcribe</h4>
+        <p>An on-device model turns your voice into text. Fast on Apple Silicon.</p>
+      </div>
+      <div class="step reveal">
+        <span class="step-n">iii.</span>
+        <h4>Clean</h4>
+        <p>Light cleanup — punctuation, filler words. Your voice stays your voice.</p>
+      </div>
+      <div class="step reveal">
+        <span class="step-n">iv.</span>
+        <h4>Type</h4>
+        <p>Text lands at your cursor, in the app you're already in. Audio is gone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BETA ============ -->
+<div class="divider"><span>05 · the invitation</span><span>what you get</span></div>
+<section class="beta" id="join">
+  <div class="beta-inner reveal">
+    <p class="beta-eyebrow">Private beta · 50 spots</p>
+    <h2>If you like being <em>early</em> to good things,<br/>I'd love to have you in.</h2>
+    <p class="beta-sub">This is a small, hand-picked beta. I'm not looking for a thousand signups — I'm looking for fifty people who will actually use it, tell me when it breaks, and help shape what it becomes.</p>
+
+    <div class="perks">
+      <div class="perk">
+        <span class="perk-ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
+        </span>
+        <div class="perk-text"><strong>Free throughout the beta</strong>Use it as much as you want for as long as the beta runs. No trial clock, no paywall.</div>
+      </div>
+      <div class="perk">
+        <span class="perk-ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 5 5.5.8-4 4 1 5.5L12 15l-5 2.3 1-5.5-4-4 5.5-.8z"/></svg>
+        </span>
+        <div class="perk-text"><strong>One year free at launch</strong>If your feedback meaningfully shapes the product, you get a full year on the house, post-launch.</div>
+      </div>
+    </div>
+
+    <div class="timeline reveal">
+      <div class="timeline-item">
+        <span class="timeline-dot"></span>
+        <div class="timeline-label">Registration closes</div>
+        <div class="timeline-date">Apr 30</div>
+      </div>
+      <div class="timeline-line"></div>
+      <div class="timeline-item">
+        <span class="timeline-dot"></span>
+        <div class="timeline-label">Beta testing</div>
+        <div class="timeline-date">May 1 – 15</div>
+      </div>
+      <div class="timeline-line"></div>
+      <div class="timeline-item">
+        <span class="timeline-dot timeline-dot-final"></span>
+        <div class="timeline-label">Launch</div>
+        <div class="timeline-date">June</div>
+      </div>
+    </div>
+
+    <div class="countdown reveal" aria-live="polite">
+      <span class="countdown-label">Registration closes in</span>
+      <div class="countdown-grid">
+        <div><span class="cd-num" id="cd-days">—</span><span class="cd-unit">days</span></div>
+        <div><span class="cd-num" id="cd-hours">—</span><span class="cd-unit">hours</span></div>
+        <div><span class="cd-num" id="cd-mins">—</span><span class="cd-unit">minutes</span></div>
+        <div><span class="cd-num" id="cd-secs">—</span><span class="cd-unit">seconds</span></div>
+      </div>
+    </div>
+
+    <a href="https://forms.gle/Gb5ygpXr7MjD7NTUA" class="btn" target="_blank" rel="noopener">
+      Take a beta spot
+      <svg class="arrow arrow-out" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+    </a>
+    <p class="beta-fine">macOS · Apple Silicon · ~2 min form · hey@sollu.io</p>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="foot-brand">
+    <svg viewBox="0 0 512 512" aria-hidden="true">
+      <circle cx="256" cy="256" r="230" fill="#003153" opacity="0.08"/>
+      <circle cx="256" cy="256" r="160" fill="#003153" opacity="0.35"/>
+      <circle cx="256" cy="256" r="105" fill="#003153" opacity="1"/>
+    </svg>
+    <span>sollu</span>
+  </div>
+  <div>Write at the speed of thought, privately.</div>
+  <div style="margin-top:1rem">
+    <a href="mailto:hey@sollu.io">hey@sollu.io</a>
+    <span style="opacity:.4; margin:0 .5rem">·</span>
+    <a href="https://forms.gle/Gb5ygpXr7MjD7NTUA" target="_blank" rel="noopener">Join the beta <svg class="arrow arrow-out" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+  </div>
+  <div style="margin-top:1.5rem; opacity:.6">made on a Mac, for a Mac</div>
+</footer>
+
+<script>
+  // Nav scroll state
+  (function() {
+    const nav = document.getElementById('nav');
+    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+
+  // Demo: type out a phrase
+  (function() {
+    const target = document.getElementById('typed');
+    if (!target) return;
+    const phrases = [
+      "Idhu local-a run aagudhu, so audio cloud-ku pogaadhu.",
+      "So the thing I was trying to say — write at the speed of thought.",
+      "Dekho yaar, privacy sirf ek feature nahi hai — it's how the thing is built.",
+    ];
+    let pIdx = 0;
+    function typePhrase(phrase, cb) {
+      target.textContent = '';
+      let i = 0;
+      (function tick() {
+        if (i > phrase.length) { setTimeout(cb, 2400); return; }
+        target.textContent = phrase.slice(0, i);
+        i++;
+        setTimeout(tick, 28 + Math.random()*40);
+      })();
+    }
+    function loop() {
+      typePhrase(phrases[pIdx], () => {
+        pIdx = (pIdx + 1) % phrases.length;
+        loop();
+      });
+    }
+    setTimeout(loop, 900);
+  })();
+
+  // Reveal on scroll
+  (function() {
+    const els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(e => e.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(el => io.observe(el));
+    setTimeout(() => {
+      document.querySelectorAll('.reveal:not(.in)').forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight * 1.5) el.classList.add('in');
+      });
+    }, 3500);
+  })();
+
+  /* ============ BETA COUNTDOWN ============ */
+  (function(){
+    // Target: April 30, end-of-day UTC
+    const year = new Date().getFullYear();
+    const target = new Date(Date.UTC(year, 3, 30, 23, 59, 59));
+    const d = document.getElementById('cd-days');
+    const h = document.getElementById('cd-hours');
+    const m = document.getElementById('cd-mins');
+    const s = document.getElementById('cd-secs');
+    if (!d) return;
+    function pad(n){ return String(Math.max(0,n)).padStart(2,'0'); }
+    function tick(){
+      const diff = target - new Date();
+      if (diff <= 0) {
+        d.textContent = '00'; h.textContent = '00'; m.textContent = '00'; s.textContent = '00';
+        return;
+      }
+      const days = Math.floor(diff / 86400000);
+      const hrs  = Math.floor(diff / 3600000) % 24;
+      const mins = Math.floor(diff / 60000) % 60;
+      const secs = Math.floor(diff / 1000) % 60;
+      d.textContent = pad(days); h.textContent = pad(hrs); m.textContent = pad(mins); s.textContent = pad(secs);
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>
+</body>
+</html>

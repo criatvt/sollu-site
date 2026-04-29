@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>sollu — write at the speed of thought, privately</title>
-<meta name="description" content="A voice-to-text tool for macOS that runs entirely on your Mac and never leaves it. Private beta open — 50 spots." />
+<title>sollu, write at the speed of thought, privately</title>
+<meta name="description" content="A voice-to-text tool for macOS that runs entirely on your Mac and never leaves it. Private beta open." />
 <link rel="icon" type="image/svg+xml" href="assets/sollu-favicon.svg" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -145,6 +146,21 @@
   .btn:hover .arrow-out{ transform:translate(2px, -2px) }
   .nav-cta .arrow-out{ opacity:.85; margin-left:.2rem }
   .nav-cta:hover .arrow-out{ transform:translate(1.5px, -1.5px); opacity:1 }
+  footer{
+    text-align:center;
+    padding:3rem 1.5rem 3.5rem;
+    color:var(--muted);
+    font-size:.92rem;
+  }
+  footer a{ color:inherit; text-decoration:none; border-bottom:1px solid rgba(0,0,0,.12) }
+  footer a:hover{ color:var(--prussian); border-bottom-color:var(--prussian) }
+  .foot-brand{
+    display:inline-flex; align-items:center; gap:.5rem;
+    margin-bottom:.9rem;
+    font-family:var(--serif); font-size:1.15rem; color:var(--prussian);
+  }
+  .foot-brand svg{ width:22px; height:22px; display:block }
+  .foot-heart{ color:#c0392b }
   footer a .arrow-out{ opacity:.7 }
   footer a:hover .arrow-out{ transform:translate(1.5px, -1.5px); opacity:1 }
   .btn-ghost{
@@ -160,23 +176,30 @@
     text-align:center;
   }
   .hero-inner{ max-width:780px; margin:0 auto }
+  /* fixed-size slot — keeps surrounding text from shifting while the dot breathes */
+  .ink-slot{
+    width:36px; height:36px;
+    margin:.25rem auto 2rem;
+    display:flex; align-items:center; justify-content:center;
+  }
   .ink{
-    width:0; height:0;
+    width:14px; height:14px;
     border-radius:50%;
     background:var(--prussian);
     opacity:0;
-    margin:.25rem auto 2rem;
+    transform:scale(0);
+    transform-origin:center;
     animation:
       inkIn 800ms cubic-bezier(0.34,1.56,0.64,1) forwards 150ms,
       inkBreath 4s ease-in-out infinite 1s;
   }
   @keyframes inkIn{
-    0%{ width:0; height:0; opacity:0 }
-    100%{ width:14px; height:14px; opacity:1 }
+    0%{ transform:scale(0); opacity:0 }
+    100%{ transform:scale(1); opacity:1 }
   }
   @keyframes inkBreath{
-    0%,100%{ width:14px; height:14px; opacity:.85 }
-    50%    { width:36px; height:36px; opacity:1 }
+    0%,100%{ transform:scale(1); opacity:.85 }
+    50%    { transform:scale(2.57); opacity:1 }
   }
   .hero h1{
     font-family:var(--serif);
@@ -585,69 +608,6 @@
     .timeline{ flex-direction:column; align-items:center; gap:1rem }
     .timeline-line{ width:1px; height:20px; max-width:none; background:linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,.1)) }
   }
-  .countdown{
-    margin:1.5rem auto 0; max-width:560px;
-    text-align:center;
-  }
-  .countdown-label{
-    display:block;
-    font-family:var(--serif); font-style:italic;
-    font-size:.95rem; color:rgba(255,255,255,.7);
-    margin-bottom:.9rem;
-  }
-  .countdown-grid{
-    display:grid; grid-template-columns:repeat(4, 1fr);
-    gap:.75rem;
-    max-width:480px; margin:0 auto;
-  }
-  .countdown-grid > div{
-    padding:.9rem .5rem;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:10px;
-    background:rgba(255,255,255,.04);
-    display:flex; flex-direction:column; gap:.2rem;
-  }
-  .cd-num{
-    font-family:var(--serif);
-    font-size:1.75rem; font-weight:400;
-    color:#fff;
-    font-variant-numeric:tabular-nums;
-    letter-spacing:-.01em;
-  }
-  .cd-unit{
-    font-size:.72rem; letter-spacing:.1em;
-    text-transform:uppercase;
-    color:rgba(255,255,255,.5);
-  }
-
-  /* ============ FOOTER ============ */
-  footer{
-    padding:2.5rem 1.5rem 3rem;
-    text-align:center;
-    color:var(--muted);
-    font-size:.82rem;
-    border-top:1px solid var(--rule);
-  }
-  footer .foot-brand{
-    display:inline-flex; align-items:center; gap:.5rem;
-    margin-bottom:.65rem;
-    font-family:var(--serif); font-size:1rem; color:var(--ink);
-  }
-  footer .foot-brand svg{ width:18px; height:18px }
-  footer a{
-    color:var(--muted);
-    text-decoration:underline;
-    text-decoration-color:var(--rule);
-    text-underline-offset:3px;
-  }
-  footer a:hover{ color:var(--prussian) }
-
-  /* ============ REVEAL ============ */
-  .reveal{ opacity:0; transform:translateY(12px); transition:opacity .7s ease, transform .7s ease }
-  .reveal.in{ opacity:1; transform:none }
-  @media (prefers-reduced-motion: reduce){
-    .reveal{ opacity:1; transform:none; transition:none }
-  }
 
   /* ============ MOBILE TIGHTEN ============ */
   @media (max-width:560px){
@@ -684,7 +644,7 @@
 <!-- ============ HERO ============ -->
 <header class="hero">
   <div class="hero-inner">
-    <div class="ink" aria-hidden="true"></div>
+    <div class="ink-slot" aria-hidden="true"><div class="ink"></div></div>
     <h1>Write at the speed <br/>of thought, <em>privately.</em></h1>
     <p class="hero-sub">Local-first voice-to-text for macOS.</p>
     <div class="hero-ctas">
@@ -694,7 +654,7 @@
       </a>
       <a href="#why" class="btn btn-ghost">Why it exists</a>
     </div>
-    <p class="hero-meta">50 spots <span class="sep">·</span> macOS · Apple Silicon <span class="sep">·</span> free throughout beta</p>
+    <p class="hero-meta">macOS · Apple Silicon only <span class="sep">·</span> free throughout beta</p>
   </div>
 </header>
 
@@ -703,7 +663,7 @@
   <div class="demo-window reveal">
     <div class="demo-bar">
       <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      <span class="demo-bar-title">dictation — sollu</span>
+      <span class="demo-bar-title">dictation · sollu</span>
     </div>
     <div class="demo-body" id="demoBody"><span class="typed" id="typed"></span><span class="demo-caret"></span></div>
     <div class="demo-foot">
@@ -727,12 +687,12 @@
       <div class="card reveal">
         <span class="card-num">i.</span>
         <h3>Runs on your Mac</h3>
-        <p>Everything happens on-device. Your audio lives in memory only while you hold the key — the moment it's transcribed, it's gone.</p>
+        <p>Everything happens on-device. Your audio lives in memory only while you hold the key. The moment it's transcribed, it's gone.</p>
       </div>
       <div class="card reveal">
         <span class="card-num">ii.</span>
         <h3>Works in any app</h3>
-        <p>Text lands at your cursor — in Notion, Slack, VS Code, Mail, anywhere.</p>
+        <p>Text lands at your cursor, in Notion, Slack, VS Code, Mail, anywhere.</p>
       </div>
       <div class="card reveal">
         <span class="card-num">iii.</span>
@@ -750,7 +710,7 @@
     <div class="what-head reveal">
       <p class="eyebrow">Who it's for</p>
       <h2 class="h2">Built for people who <em>think in sentences.</em></h2>
-      <p class="lede">If your first drafts are messy, personal, or just too much to type — sollu is for you.</p>
+      <p class="lede">If your first drafts are messy, personal, or just too much to type. Sollu is for you.</p>
     </div>
     <ul class="who-grid reveal">
       <li><span class="who-tag">Writers</span> drafting essays, newsletters, books.</li>
@@ -770,13 +730,13 @@
     <p class="why-quote reveal">A pen's job is to write. <em>Not to remember. Not to transmit.</em></p>
 
     <div class="why-body reveal">
-      <p>A voice-to-text app, in the digital era, should act like a pen. It should hear you and write it down — nothing more. There are already plenty of notepads, audio archives, and second brains. Those are different products, for different jobs.</p>
+      <p>A voice-to-text app, in the digital era, should act like a pen. It should hear you and write it down. Nothing more. There are already plenty of notepads, audio archives, and second brains. Those are different products, for different jobs.</p>
 
-      <p>I kept looking for that pen, and couldn't find one. I'm a writer who's lazy to type — and I don't want an LLM generating my first draft. Every voice-to-text app I tried had a trade-off I couldn't live with: the transcription wasn't good enough, the privacy was someone else's policy document, or my words were quietly being used to train a model I'd never see.</p>
+      <p>I kept looking for that pen, and couldn't find one. I'm a writer who's lazy to type, and I don't want an LLM generating my first draft. Every voice-to-text app I tried had a trade-off I couldn't live with: the transcription wasn't good enough, the privacy was someone else's policy document, or my words were quietly being used to train a model I'd never see.</p>
 
       <p>So I built sollu for myself. Since then I've been publishing <em>at least one essay a week</em>, brainstorming with Claude out loud instead of typing, and dumping thoughts as fast as they form. Friction, gone.</p>
 
-      <p>If that sounds useful to you too — I'd love to have you in the beta.</p>
+      <p>If that sounds useful to you too, I'd love to have you in the beta.</p>
     </div>
 
     <div class="why-sig reveal">
@@ -806,7 +766,7 @@
       <div class="step reveal">
         <span class="step-n">i.</span>
         <h4>Listen</h4>
-        <p>Hold Fn. Sollu captures audio into memory — not to disk.</p>
+        <p>Hold Fn. Sollu captures audio into memory, not to disk.</p>
       </div>
       <div class="step reveal">
         <span class="step-n">ii.</span>
@@ -816,7 +776,7 @@
       <div class="step reveal">
         <span class="step-n">iii.</span>
         <h4>Clean</h4>
-        <p>Light cleanup — punctuation, filler words. Your voice stays your voice.</p>
+        <p>Light cleanup. Punctuation, filler words. Your voice stays your voice.</p>
       </div>
       <div class="step reveal">
         <span class="step-n">iv.</span>
@@ -831,9 +791,9 @@
 <div class="divider"><span>05 · the invitation</span><span>what you get</span></div>
 <section class="beta" id="join">
   <div class="beta-inner reveal">
-    <p class="beta-eyebrow">Private beta · 50 spots</p>
+    <p class="beta-eyebrow">Private beta</p>
     <h2>If you like being <em>early</em> to good things,<br/>I'd love to have you in.</h2>
-    <p class="beta-sub">This is a small, hand-picked beta. I'm not looking for a thousand signups — I'm looking for fifty people who will actually use it, tell me when it breaks, and help shape what it becomes.</p>
+    <p class="beta-sub">This is a small, hand-picked beta. I'm not looking for a thousand signups. I'm looking for a handful of people who will actually use it, tell me when it breaks, and help shape what it becomes.</p>
 
     <div class="perks">
       <div class="perk">
@@ -853,30 +813,20 @@
     <div class="timeline reveal">
       <div class="timeline-item">
         <span class="timeline-dot"></span>
-        <div class="timeline-label">Registration closes</div>
-        <div class="timeline-date">Apr 30</div>
+        <div class="timeline-label">Registration</div>
+        <div class="timeline-date">open through May</div>
       </div>
       <div class="timeline-line"></div>
       <div class="timeline-item">
         <span class="timeline-dot"></span>
         <div class="timeline-label">Beta testing</div>
-        <div class="timeline-date">May 1 – 15</div>
+        <div class="timeline-date">throughout May</div>
       </div>
       <div class="timeline-line"></div>
       <div class="timeline-item">
         <span class="timeline-dot timeline-dot-final"></span>
         <div class="timeline-label">Launch</div>
-        <div class="timeline-date">June</div>
-      </div>
-    </div>
-
-    <div class="countdown reveal" aria-live="polite">
-      <span class="countdown-label">Registration closes in</span>
-      <div class="countdown-grid">
-        <div><span class="cd-num" id="cd-days">—</span><span class="cd-unit">days</span></div>
-        <div><span class="cd-num" id="cd-hours">—</span><span class="cd-unit">hours</span></div>
-        <div><span class="cd-num" id="cd-mins">—</span><span class="cd-unit">minutes</span></div>
-        <div><span class="cd-num" id="cd-secs">—</span><span class="cd-unit">seconds</span></div>
+        <div class="timeline-date">when it's earned</div>
       </div>
     </div>
 
@@ -884,7 +834,7 @@
       Take a beta spot
       <svg class="arrow arrow-out" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
     </a>
-    <p class="beta-fine">macOS · Apple Silicon · ~2 min form · hey@sollu.io</p>
+    <p class="beta-fine">macOS · Apple Silicon · ~2 min form · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6b030e122b180407071e450204">[email&#160;protected]</a></p>
   </div>
 </section>
 
@@ -900,14 +850,14 @@
   </div>
   <div>Write at the speed of thought, privately.</div>
   <div style="margin-top:1rem">
-    <a href="mailto:hey@sollu.io">hey@sollu.io</a>
+    <a href="/cdn-cgi/l/email-protection#a2cac7dbe2d1cdceced78ccbcd"><span class="__cf_email__" data-cfemail="066e637f4675696a6a73286f69">[email&#160;protected]</span></a>
     <span style="opacity:.4; margin:0 .5rem">·</span>
     <a href="https://forms.gle/Gb5ygpXr7MjD7NTUA" target="_blank" rel="noopener">Join the beta <svg class="arrow arrow-out" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
   </div>
-  <div style="margin-top:1.5rem; opacity:.6">made on a Mac, for a Mac</div>
+  <div style="margin-top:1.5rem; opacity:.6">Made with Whisper, for the love of words <span class="foot-heart" aria-hidden="true">♥</span></div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // Nav scroll state
   (function() {
     const nav = document.getElementById('nav');
@@ -922,8 +872,8 @@
     if (!target) return;
     const phrases = [
       "Idhu local-a run aagudhu, so audio cloud-ku pogaadhu.",
-      "So the thing I was trying to say — write at the speed of thought.",
-      "Dekho yaar, privacy sirf ek feature nahi hai — it's how the thing is built.",
+      "So the thing I was trying to say, write at the speed of thought.",
+      "Dekho yaar, privacy sirf ek feature nahi hai, it's how the thing is built.",
     ];
     let pIdx = 0;
     function typePhrase(phrase, cb) {
@@ -969,32 +919,7 @@
     }, 3500);
   })();
 
-  /* ============ BETA COUNTDOWN ============ */
-  (function(){
-    // Target: April 30, end-of-day UTC
-    const year = new Date().getFullYear();
-    const target = new Date(Date.UTC(year, 3, 30, 23, 59, 59));
-    const d = document.getElementById('cd-days');
-    const h = document.getElementById('cd-hours');
-    const m = document.getElementById('cd-mins');
-    const s = document.getElementById('cd-secs');
-    if (!d) return;
-    function pad(n){ return String(Math.max(0,n)).padStart(2,'0'); }
-    function tick(){
-      const diff = target - new Date();
-      if (diff <= 0) {
-        d.textContent = '00'; h.textContent = '00'; m.textContent = '00'; s.textContent = '00';
-        return;
-      }
-      const days = Math.floor(diff / 86400000);
-      const hrs  = Math.floor(diff / 3600000) % 24;
-      const mins = Math.floor(diff / 60000) % 60;
-      const secs = Math.floor(diff / 1000) % 60;
-      d.textContent = pad(days); h.textContent = pad(hrs); m.textContent = pad(mins); s.textContent = pad(secs);
-    }
-    tick();
-    setInterval(tick, 1000);
-  })();
+  
 </script>
 </body>
 </html>
